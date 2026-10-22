@@ -1,6 +1,118 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pulse — My Space</title><style>
-:root{--v:#7764f4;--d:#252839;--d2:#1e202b;--line:#e7e8f0;--muted:#858a9b;--lime:#d9f45d}*{box-sizing:border-box}body{margin:0;height:100vh;overflow:hidden;font:14px Inter,system-ui,sans-serif;color:#252735;background:#fff}button,input{font:inherit}button{cursor:pointer;border:0}.app{height:100%;display:grid;grid-template-columns:74px 245px minmax(350px,1fr) 220px}.servers{background:var(--d2);display:flex;align-items:center;flex-direction:column;gap:12px;padding:14px 12px}.logo,.server{width:44px;height:44px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:850}.logo{background:var(--v);box-shadow:0 8px 20px #7764f477;font-size:20px;position:relative}.logo:after{content:'';position:absolute;width:9px;height:9px;background:var(--lime);border-radius:50%;right:-2px;top:-2px}.server{background:#363946;color:#c7cad7}.server:hover,.server.active{background:#4c5061;border-radius:13px}.server.add{color:var(--lime);font-size:23px}.rule{width:30px;height:1px;background:#4b4e5e}.side{background:var(--d);color:#c7cad6;display:flex;flex-direction:column;min-width:0}.space{height:66px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #3b3e4e;padding:0 17px;color:#fff;font-weight:800}.side button{background:none;color:inherit}.channels{overflow:auto;padding:13px 9px}.group{padding:10px 7px 6px;color:#959aaf;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;display:flex}.group button{margin-left:auto;font-size:18px}.channel{display:flex;align-items:center;gap:8px;width:100%;padding:8px;border-radius:7px;color:#c2c5d1;text-align:left;margin:1px 0}.channel:hover,.channel.active{background:#464959;color:#fff}.hash{font-size:18px;color:#a4a8ba}.badge{margin-left:auto;font-size:10px;background:#dc6478;padding:2px 5px;border-radius:5px}.voice{margin:9px 7px;padding:10px;background:#303342;border-radius:9px;font-size:12px}.voice strong{display:block;color:#fff;margin-bottom:4px}.voice button{margin-top:8px;background:#4b4e60;border-radius:6px;padding:5px 8px;font-size:11px}.profile{margin-top:auto;border-top:1px solid #3b3e4e;padding:11px;display:flex;align-items:center;gap:8px}.avatar{width:34px;height:34px;border-radius:11px;background:var(--lime);display:grid;place-items:center;font-weight:850;color:#252735;flex:none}.profile b{font-size:12px;display:block;max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.profile small{font-size:10px;color:#a2a6b7}.logout{margin-left:auto;font-size:16px}.chat{display:flex;min-width:0;flex-direction:column}.head{height:66px;border-bottom:1px solid var(--line);box-shadow:0 2px 8px #22223307;display:flex;align-items:center;padding:0 21px;gap:10px}.head h2{font-size:15px;margin:0}.head h2 span{font-size:12px;font-weight:500;color:#9196a6;margin-left:9px}.head-actions{margin-left:auto;display:flex;gap:8px;align-items:center}.icon{background:none;color:#73788a;padding:6px;font-size:17px;border-radius:7px}.icon:hover{background:#f0f0f5;color:var(--v)}.search{width:145px;background:#f2f3f7;border:0;border-radius:8px;padding:8px 10px;outline-color:var(--v);font-size:12px}.feed{flex:1;overflow:auto;padding:22px max(28px,6%)}.start{border-bottom:1px solid var(--line);padding:22px 0 24px;margin-bottom:12px}.emblem{width:62px;height:62px;border-radius:21px;background:var(--d);color:white;display:grid;place-items:center;font-size:32px;margin-bottom:12px}.start h1{font-size:29px;letter-spacing:-.05em;margin:0 0 6px}.start p{color:var(--muted);margin:0}.start button{margin-top:14px;padding:8px 11px;border-radius:8px;color:#5947d4;background:#eceaff;font-size:12px;font-weight:750}.msg{display:flex;gap:11px;padding:8px 0;position:relative}.msg:hover{background:#fafaff;margin:0 -10px;padding:8px 10px}.msg .avatar{background:#e7e3ff;color:#5545a3;width:37px;height:37px}.msg.me .avatar{background:var(--lime);color:#283022}.meta b{font-size:13px}.meta time{font-size:10px;color:#a0a4b3;margin-left:6px}.msg p{line-height:1.45;color:#4f5465;margin:4px 0 0;white-space:pre-wrap;word-break:break-word}.tools{display:none;position:absolute;right:5px;top:-9px;border:1px solid var(--line);background:white;border-radius:7px;box-shadow:0 8px 22px #22223318}.msg:hover .tools{display:flex}.tools button{background:white;color:#74798b;padding:5px 8px}.reaction{border:1px solid #dfdcff;background:#f8f7ff;color:#574eaa;border-radius:7px;padding:3px 7px;margin-top:7px;font-size:12px}.compose-wrap{padding:0 max(28px,6%) 20px}.typing{height:19px;color:#898e9f;font-size:11px;padding-left:5px}.compose{display:flex;align-items:center;gap:7px;border:1px solid var(--line);background:#fafaff;border-radius:13px;padding:7px 9px}.compose input{border:0;outline:0;background:transparent;flex:1;min-width:0;padding:7px}.plus{background:#e9eaf0!important;border-radius:50%;width:28px;height:28px;font-size:19px;color:#686d7f}.emoji{background:none;color:#727789;font-size:19px}.send{background:var(--v);color:#fff;border-radius:9px;padding:8px 13px;font-weight:750;font-size:12px}.members{background:#fafaff;border-left:1px solid var(--line);padding:20px 13px;overflow:auto}.members h3{font-size:10px;color:#9195a6;text-transform:uppercase;letter-spacing:.09em;margin:5px 7px 11px}.member{display:flex;gap:8px;align-items:center;padding:7px;border-radius:8px;color:#555a6c}.member:hover{background:#f0f0f7}.member .avatar{background:#ffe1d2;width:29px;height:29px;border-radius:9px;font-size:11px}.member small{display:block;color:#a0a4b1;font-size:10px;margin-top:2px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#282b3a;color:#fff;padding:10px 14px;border-radius:9px;box-shadow:0 10px 30px #11121d33;z-index:3}.hidden{display:none!important}@media(max-width:1050px){.app{grid-template-columns:74px 245px minmax(350px,1fr)}.members{display:none}}@media(max-width:710px){.app{grid-template-columns:64px 1fr}.side{display:none}.servers{padding:12px 10px}.logo,.server{width:40px;height:40px}.feed{padding:17px}.compose-wrap{padding:0 17px 16px}.search{display:none}.msg:hover{margin:0}.tools{display:none!important}}@media(max-width:430px){.app{grid-template-columns:55px 1fr}.servers{padding:12px 7px}.logo,.server{width:37px;height:37px}.head{padding:0 13px}.head-actions .icon{display:none}.start h1{font-size:24px}}
-</style></head><body><div class="app"><nav class="servers"><div class="logo">✦</div><div class="rule"></div><button class="server active">M</button><button class="server">D</button><button class="server">S</button><button class="server add" onclick="toast('Your new space is ready to personalize')">+</button></nav><aside class="side"><header class="space">My Space <button onclick="toast('Space settings are coming soon')">⌄</button></header><div class="channels"><div class="group">Text channels <button onclick="newChannel()">+</button></div><div id="channelList"></div><div class="group">Voice</div><button class="channel" onclick="toast('Voice rooms are a Pulse Pro feature')"><span class="hash">◉</span>After hours</button><div class="voice"><strong>After hours</strong>1 person listening<br><button onclick="toast('You joined After hours')">Join voice</button></div></div><footer class="profile"><div class="avatar" id="initial">P</div><div><b id="username">Pulse user</b><small>● Online</small></div><button class="logout" onclick="logout()">↪</button></footer></aside><main class="chat"><header class="head"><h2 id="title"># lounge <span id="desc">the general hangout</span></h2><div class="head-actions"><button class="icon" onclick="toggleMembers()">♧</button><button class="icon" onclick="toast('Pinned messages: no pins yet')">⌖</button><input class="search" id="search" placeholder="Search messages" oninput="searchMessages()"></div></header><section class="feed" id="feed"></section><div class="compose-wrap"><div class="typing" id="typing"></div><form class="compose" id="composer"><button type="button" class="plus" onclick="toast('File uploads are coming soon')">+</button><input id="input" maxlength="1000" autocomplete="off" placeholder="Message # lounge"><button type="button" class="emoji" onclick="input.value+=' ✦';input.focus()">☺</button><button class="send">Send</button></form></div></main><aside class="members" id="members"><h3>Online — 4</h3><div id="memberList"></div></aside></div><script>
-const seeds={lounge:[['Sam','Good morning, wonderful people. Who’s up for a tiny co-work sprint?','☀'],['Mira','I’m in! Sharing the playlist I’ve had on repeat.','✦'],['Arlo','Joining in five. Making coffee first ☺','☕']],ideas:[['Arlo','What should we build together next?','☕']],"music-room":[['Nia','Drop your current repeat here 🎧','♫']]},descs={lounge:'the general hangout',ideas:'make it real','music-room':'sounds for the moment'};const me=localStorage.getItem('pulseUser');if(!me)location.href='signin.html';username.textContent=me;initial.textContent=me[0].toUpperCase();let data=JSON.parse(localStorage.getItem('pulseChat')||'null')||{channels:Object.keys(seeds),msgs:Object.fromEntries(Object.entries(seeds).map(([k,v])=>[k,v.map(([name,text,icon])=>({id:crypto.randomUUID(),name,text,icon,at:Date.now()-480000}))]))},current='lounge',membersOn=true;const clean=s=>String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));const save=()=>localStorage.setItem('pulseChat',JSON.stringify(data));const clock=a=>new Date(a).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});function channels(){channelList.innerHTML=data.channels.map(c=>`<button class="channel ${c===current?'active':''}" data-c="${clean(c)}"><span class="hash">#</span>${clean(c)}${c==='ideas'?'<span class="badge">2</span>':''}</button>`).join('')}function memberRender(){memberList.innerHTML=[['Sam','☀','In a focus session'],['Mira','✦','Listening to music'],['Arlo','☕','Online'],[me,me[0].toUpperCase(),'Online']].map(x=>`<div class="member"><div class="avatar">${clean(x[1])}</div><div>${clean(x[0])}<small>${clean(x[2])}</small></div></div>`).join('')}function render(){channels();title.innerHTML='# '+clean(current)+' <span id="desc">'+clean(descs[current]||'a new Pulse channel')+'</span>';input.placeholder='Message # '+current;let list=data.msgs[current]||[];feed.innerHTML=`<div class="start"><div class="emblem">#</div><h1>Welcome to # ${clean(current)}</h1><p>This is the beginning of the ${clean(current)} channel.</p><button onclick="toast('Invite link copied to clipboard')">Invite people</button></div>`+list.map(m=>`<article class="msg ${m.name===me?'me':''}" data-id="${m.id}"><div class="avatar">${clean(m.icon||m.name[0])}</div><div><div class="meta"><b>${clean(m.name)}</b><time>${clock(m.at)}</time></div><p>${clean(m.text)}</p>${m.react?`<button class="reaction" onclick="react('${m.id}')">${m.react} 1</button>`:''}</div><div class="tools"><button onclick="react('${m.id}')">☺</button>${m.name===me?`<button onclick="editMsg('${m.id}')">✎</button><button onclick="deleteMsg('${m.id}')">×</button>`:''}</div></article>`).join('');feed.scrollTop=feed.scrollHeight}channelList.onclick=e=>{let x=e.target.closest('[data-c]');if(x){current=x.dataset.c;render()}};composer.onsubmit=e=>{e.preventDefault();let t=input.value.trim();if(!t)return;(data.msgs[current]??=[]).push({id:crypto.randomUUID(),name:me,text:t,icon:me[0].toUpperCase(),at:Date.now()});save();input.value='';typing.textContent='';render()};input.oninput=()=>typing.textContent=input.value?'You are typing…':'';function react(id){let x=data.msgs[current].find(m=>m.id===id);x.react=x.react?'':'✦';save();render()}function editMsg(id){let x=data.msgs[current].find(m=>m.id===id),t=prompt('Edit message',x.text);if(t&&t.trim()){x.text=t.trim();save();render()}}function deleteMsg(id){if(confirm('Delete this message?')){data.msgs[current]=data.msgs[current].filter(m=>m.id!==id);save();render()}}function newChannel(){let n=prompt('Name your new channel');if(!n)return;n=n.trim().toLowerCase().replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');if(!n)return toast('Choose a valid channel name');if(data.channels.includes(n))return toast('That channel already exists');data.channels.push(n);data.msgs[n]=[];descs[n]='a new Pulse channel';current=n;save();render();toast('# '+n+' created')}function searchMessages(){let q=search.value.toLowerCase().trim();document.querySelectorAll('.msg').forEach(m=>m.classList.toggle('hidden',q&&!m.innerText.toLowerCase().includes(q)))}function toggleMembers(){membersOn=!membersOn;members.classList.toggle('hidden',!membersOn)}function logout(){localStorage.removeItem('pulseUser');location.href='index.html'}function toast(t){document.querySelector('.toast')?.remove();let e=document.createElement('div');e.className='toast';e.textContent=t;document.body.append(e);setTimeout(()=>e.remove(),2400)}memberRender();render();
-</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1e1f22">
+  <title>Pulse</title>
+  <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="workspace.css">
+  <script src="icons.js" defer></script>
+  <script src="voice.js" defer></script>
+  <script src="servers.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <nav class="rail" aria-label="Pulse navigation">
+      <button class="brand-btn active" data-action="show-friends" aria-label="Pulse home" title="Pulse home">✦</button>
+      <div class="rail-divider"></div>
+      <div id="serverList" aria-label="Your servers"></div>
+      <button class="rail-btn create-server" data-server-action="create" aria-label="Create a server" title="Create a server">＋</button>
+      <button class="rail-btn" data-server-action="join" aria-label="Join a server" title="Join a server">↗</button>
+      <button class="rail-btn" data-action="open-settings" aria-label="User settings" title="User settings" data-icon="settings"></button>
+    </nav>
+
+    <aside class="dm-sidebar">
+      <div id="homeSidebar">
+      <div class="sidebar-search"><button data-action="open-quick-switcher">Find or start a conversation</button></div>
+      <div class="home-nav">
+        <button class="nav-item active" data-view="friends"><span class="nav-icon">♣</span>Friends</button>
+        <button class="nav-item" data-view="requests"><span class="nav-icon">◉</span>Friend requests <span class="nav-badge hidden" id="requestBadge">0</span></button>
+      </div>
+      <section class="dm-section">
+        <header><span>Direct Messages</span><button data-action="new-dm" aria-label="New direct message" title="New direct message">＋</button></header>
+        <div class="dm-list" id="dmList"></div>
+      </section>
+      </div>
+      <div id="serverSidebar" class="hidden"></div>
+      <div id="voiceDock" class="hidden"></div>
+      <footer class="user-panel">
+        <button class="user-summary" data-action="open-settings"><span class="avatar online" id="selfAvatar"></span><span class="user-copy"><strong id="selfName"></strong><small id="selfStatus">Online</small></span></button>
+        <button class="panel-icon" data-action="toggle-mute" id="muteButton" title="Mute microphone" aria-label="Mute microphone" data-icon="mic"></button>
+        <button class="panel-icon" data-action="toggle-deafen" id="deafenButton" title="Deafen" aria-label="Deafen" data-icon="headphones"></button>
+        <button class="panel-icon" data-action="open-settings" title="User settings" aria-label="User settings" data-icon="settings"></button>
+      </footer>
+    </aside>
+
+    <main class="main-panel">
+      <header class="toolbar" id="toolbar"></header>
+      <section class="content" id="content"></section>
+    </main>
+    <aside class="activity-panel" id="activityPanel"><h2>Active Now</h2><div class="activity-empty"><strong>It’s quiet for now…</strong><p>When a friend starts an activity, it’ll show up here.</p></div></aside>
+  </div>
+  <button class="sidebar-overlay" data-action="close-sidebar" aria-label="Close navigation"></button>
+  <div id="remoteAudio"></div>
+  <input type="file" id="attachmentFile" class="hidden" accept="image/png,image/jpeg,image/webp,image/gif,text/plain,application/pdf">
+  <div class="modal-backdrop hidden" id="serverModal" role="dialog" aria-modal="true" aria-label="Server controls"></div>
+  <div class="modal-backdrop hidden" id="detailModal" role="dialog" aria-modal="true" aria-label="Details"></div>
+  <div class="modal-backdrop hidden" id="messageModal" role="dialog" aria-modal="true" aria-label="Edit message"></div>
+
+  <div class="modal-backdrop hidden" id="personModal" role="dialog" aria-modal="true">
+    <section class="modal-card compact-modal"><header><div><h2>New direct message</h2><p>Choose an account saved in this browser.</p></div><button data-action="close-person-modal" aria-label="Close">×</button></header><label class="field-label" for="personSearch">Find someone</label><input class="form-control" id="personSearch" placeholder="Search by display name or email" autocomplete="off"><div class="person-picker" id="personPicker"></div></section>
+  </div>
+
+  <div class="modal-backdrop hidden" id="quickModal" role="dialog" aria-modal="true">
+    <section class="modal-card quick-modal"><input class="form-control quick-input" id="quickSearch" placeholder="Where would you like to go?" autocomplete="off"><div class="quick-results" id="quickResults"></div><footer><span>↑↓ Navigate</span><span>Enter Select</span><span>Esc Close</span></footer></section>
+  </div>
+
+  <div class="modal-backdrop hidden" id="settingsModal" role="dialog" aria-modal="true">
+    <section class="settings-modal">
+      <aside class="settings-nav">
+        <h2>User Settings</h2>
+        <button class="active" data-settings-tab="account">My Account</button>
+        <button data-settings-tab="profile">Profiles</button>
+        <button data-settings-tab="appearance">Appearance</button>
+        <button data-settings-tab="connections">Connections</button>
+        <div class="settings-separator"></div>
+        <button class="danger-link" data-action="logout">Log Out</button>
+      </aside>
+      <div class="settings-content">
+        <button class="close-settings" data-action="close-settings" aria-label="Close settings">×<small>ESC</small></button>
+        <section class="settings-tab" data-tab-panel="account">
+          <h1>My Account</h1>
+          <div class="account-card"><div class="account-banner" id="accountBanner"></div><div class="account-head"><span class="profile-avatar" id="accountAvatar"></span><div><h2 id="accountName"></h2><p id="accountHandle"></p></div><button class="button primary" data-settings-tab="profile">Edit User Profile</button></div><div class="account-details"><div><span>Display Name</span><strong id="accountDisplayName"></strong></div><div><span>Email</span><strong id="accountEmail"></strong></div></div></div>
+        </section>
+        <section class="settings-tab hidden" data-tab-panel="profile">
+          <h1>Profiles</h1><p class="settings-lead">Make your profile feel like you. Every option is free.</p>
+          <div class="profile-editor-grid">
+            <form id="profileForm" class="profile-form">
+              <label class="field-label" for="profileName">Display Name</label><input class="form-control" id="profileName" maxlength="32">
+              <label class="field-label" for="profilePronouns">Pronouns</label><input class="form-control" id="profilePronouns" maxlength="40" placeholder="Optional">
+              <label class="field-label" for="profileStatus">Custom Status</label><input class="form-control" id="profileStatus" maxlength="60" placeholder="What are you up to?">
+              <label class="field-label" for="profileBio">About Me</label><textarea class="form-control" id="profileBio" maxlength="190" placeholder="Tell people a little about yourself"></textarea>
+              <div class="upload-grid"><label class="upload-button">Upload Avatar<input id="avatarUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label><label class="upload-button">Upload Banner<input id="bannerUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></label></div>
+              <p class="upload-hint">PNG, JPG, WebP, or animated GIF · 1 MB max each</p>
+            </form>
+            <article class="profile-card" id="profilePreview"><div class="banner" id="previewBanner"></div><span class="profile-avatar" id="previewAvatar"></span><div class="profile-card-body"><h3 id="previewName"></h3><small id="previewPronouns"></small><span class="nameplate hidden" id="previewNameplate"></span><hr><strong>About Me</strong><p id="previewBio"></p><div class="custom-status" id="previewStatus"></div></div></article>
+          </div>
+        </section>
+        <section class="settings-tab hidden" data-tab-panel="appearance">
+          <h1>Appearance</h1><p class="settings-lead">Profile themes, decorations, and effects are included for free.</p>
+          <label class="field-label" for="profileColor">Profile Color</label><div class="color-row"><input id="profileColor" type="color" value="#5865f2"><div class="swatches" id="swatches"></div></div>
+          <label class="field-label">Avatar Decoration</label><div class="option-grid" id="decorOptions"></div>
+          <label class="field-label">Nameplate</label><div class="option-grid" id="nameplateOptions"></div>
+          <label class="field-label">Profile Effect</label><div class="option-grid" id="effectOptions"></div>
+        </section>
+        <section class="settings-tab hidden" data-tab-panel="connections">
+          <h1>Profile links</h1><p class="settings-lead">Add links to your profiles. Links are not verified account connections.</p><div class="connections" id="connections"></div>
+          <div class="activity-setting"><div><strong>Display Current Activity</strong><p>Show your selected activity on your profile.</p></div><button class="switch" id="activitySwitch" data-action="toggle-activity" aria-label="Toggle activity"></button></div>
+          <label class="field-label" for="favoriteGame">Current Game</label><input class="form-control" id="favoriteGame" maxlength="60" placeholder="Add a game or activity">
+        </section>
+        <footer class="settings-actions"><span id="unsavedText">Careful — you have unsaved changes!</span><button class="button" data-action="reset-settings">Reset</button><button class="button primary" data-action="save-settings">Save Changes</button></footer>
+      </div>
+    </section>
+  </div>
+  <div class="toast hidden" id="toast" role="status"></div>
+</body>
+</html>

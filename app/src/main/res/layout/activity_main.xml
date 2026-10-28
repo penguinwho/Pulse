@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -27,7 +28,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Open settings"
-            android:src="@android:drawable/ic_menu_preferences" />
+            android:src="@drawable/ic_settings_gear" />
     </LinearLayout>
 
     <TextView
@@ -39,19 +40,34 @@
         android:textColor="@color/pulse_muted"
         android:textSize="15sp" />
 
-    <EditText
-        android:id="@+id/search"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/bg_now_playing"
-        android:hint="Search your library"
-        android:imeOptions="actionDone"
-        android:inputType="text"
-        android:paddingHorizontal="18dp"
-        android:singleLine="true"
-        android:textColor="@color/pulse_ink"
-        android:textColorHint="@color/pulse_muted" />
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@drawable/bg_now_playing"
+            android:hint="Search your library"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:paddingHorizontal="18dp"
+            android:singleLine="true"
+            android:textColor="@color/pulse_ink"
+            android:textColorHint="@color/pulse_muted" />
+        <ImageButton
+            android:id="@+id/filter"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_now_playing"
+            android:contentDescription="Filter music source"
+            android:src="@drawable/ic_filter" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/songsLabel"
@@ -178,4 +194,13 @@
             android:contentDescription="Next song"
             android:src="@android:drawable/ic_media_next" />
     </LinearLayout>
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@color/pulse_surface"
+        app:itemIconTint="@color/pulse_lilac"
+        app:itemTextColor="@color/pulse_lilac"
+        app:menu="@menu/library_navigation" />
 </LinearLayout>

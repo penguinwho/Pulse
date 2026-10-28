@@ -37,7 +37,8 @@ class MediaStoreRepository(private val context: Context) {
                         artist = cursor.getString(artist).orEmpty().replace("<unknown>", "Unknown artist"),
                         album = cursor.getString(album).orEmpty(),
                         durationMs = cursor.getLong(duration),
-                        uri = ContentUris.withAppendedId(collection, audioId)
+                            uri = ContentUris.withAppendedId(collection, audioId),
+                            fromAddedFolder = false
                     ))
                 }
             }
@@ -69,7 +70,8 @@ class MediaStoreRepository(private val context: Context) {
                             artist = "Added folder",
                             album = root.name.orEmpty(),
                             durationMs = 0,
-                            uri = child.uri
+                            uri = child.uri,
+                            fromAddedFolder = true
                         )
                     }
                 }

@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -22,10 +23,13 @@ import com.pulse.player.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var adapter: SongAdapter
+    private lateinit var songAdapter: SongAdapter
+    private lateinit var collectionAdapter: CollectionAdapter
     private var allSongs: List<Song> = emptyList()
     private var controller: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
+    private var browseMode = BrowseMode.SONGS
+    private var sourceFilter = SourceFilter.ALL
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -49,10 +53,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        adapter = SongAdapter(::playSong)
+        songAdapter = SongAdapter(::playSong)
+        collectionAdapter = CollectionAdapter(::playCollection)
         binding.songs.layoutManager = LinearLayoutManager(this)
-        binding.songs.adapter = adapter
-        binding.search.addTextChangedListener { filter(it?.toString().orEmpty()) }
+        binding.songs.adapter = songAdapter
+        binding.search.addTextChangedListener { renderLibrary() }
         binding.grantAccess.setOnClickListener { requestLibraryPermission() }
         binding.settings.setOnClickListener {
             settingsLauncher.launch(Intent(this, SettingsActivity::class.java))
@@ -62,6 +67,17 @@ class MainActivity : AppCompatActivity() {
         binding.nowArtwork.setOnClickListener { openPlayer() }
         binding.next.setOnClickListener { controller?.seekToNextMediaItem() }
         binding.previous.setOnClickListener { controller?.seekToPreviousMediaItem() }
+        binding.filter.setOnClickListener { showSourceFilter() }
+        binding.navigation.selectedItemId = R.id.nav_songs
+        binding.navigation.setOnItemSelectedListener { item ->
+            browseMode = when (item.itemId) {
+                R.id.nav_albums -> BrowseMode.ALBUMS
+                R.id.nav_artists -> BrowseMode.ARTISTS
+                else -> BrowseMode.SONGS
+            }
+            renderLibrary()
+            true
+        }
 
         connectPlayer()
         if (hasLibraryPermission() || AppPreferences.folders(this).isNotEmpty()) loadLibrary() else showPermissionState()
@@ -100,25 +116,81 @@ class MainActivity : AppCompatActivity() {
             )
             runOnUiThread {
                 allSongs = result
-                filter(binding.search.text?.toString().orEmpty())
+                renderLibrary()
                 if (result.isEmpty()) showEmptyLibraryState()
             }
         }.start()
     }
 
-    private fun filter(query: String) {
-        val needle = query.trim()
-        val visible = if (needle.isBlank()) allSongs else allSongs.filter { song ->
+    private fun visibleSongs(): List<Song> {
+        val needle = binding.search.text?.toString().orEmpty().trim()
+        return allSongs.filter { song ->
+            val sourceMatches = when (sourceFilter) {
+                SourceFilter.ALL -> true
+                SourceFilter.DEVICE -> !song.fromAddedFolder
+                SourceFilter.FOLDERS -> song.fromAddedFolder
+            }
+            sourceMatches && (needle.isBlank() ||
             song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true)
+            )
         }
+    }
+
+    private fun renderLibrary() {
+        val visible = visibleSongs()
         val currentId = controller?.currentMediaItem?.mediaId
-        adapter.submit(visible, currentId)
-        binding.songsLabel.text = if (needle.isBlank()) "SONGS · ${allSongs.size}" else "RESULTS · ${visible.size}"
+        val label = when (browseMode) {
+            BrowseMode.SONGS -> "SONGS"
+            BrowseMode.ALBUMS -> "ALBUMS"
+            BrowseMode.ARTISTS -> "ARTISTS"
+        }
+        when (browseMode) {
+            BrowseMode.SONGS -> {
+                binding.songs.adapter = songAdapter
+                songAdapter.submit(visible, currentId)
+                binding.songsLabel.text = "$label · ${visible.size}"
+            }
+            BrowseMode.ALBUMS, BrowseMode.ARTISTS -> {
+                val grouped = if (browseMode == BrowseMode.ALBUMS) {
+                    visible.groupBy { it.album.ifBlank { "Unknown album" } }
+                } else {
+                    visible.groupBy { it.artist.ifBlank { "Unknown artist" } }
+                }
+                val collections = grouped.map { (name, songs) ->
+                    val subtext = if (browseMode == BrowseMode.ALBUMS) {
+                        "${songs.size} song${if (songs.size == 1) "" else "s"} · ${songs.first().artist}"
+                    } else "${songs.size} song${if (songs.size == 1) "" else "s"}"
+                    MusicCollection(name, subtext, songs)
+                }.sortedBy { it.title.lowercase() }
+                binding.songs.adapter = collectionAdapter
+                collectionAdapter.submit(collections)
+                binding.songsLabel.text = "$label · ${collections.size}"
+            }
+        }
         binding.emptyState.visibility = if (allSongs.isNotEmpty() && visible.isEmpty()) View.VISIBLE else View.GONE
         if (allSongs.isNotEmpty() && visible.isEmpty()) {
             binding.emptyTitle.text = "No matches"
-            binding.emptyText.text = "Try a title, artist, or album."
+            binding.emptyText.text = "Try another search or change the source filter."
             binding.grantAccess.visibility = View.GONE
+        }
+    }
+
+    private fun showSourceFilter() {
+        PopupMenu(this, binding.filter).apply {
+            menu.add(0, 1, 0, "All music")
+            menu.add(0, 2, 1, "Device library")
+            menu.add(0, 3, 2, "Added folders")
+            setOnMenuItemClickListener { item ->
+                sourceFilter = when (item.itemId) {
+                    2 -> SourceFilter.DEVICE
+                    3 -> SourceFilter.FOLDERS
+                    else -> SourceFilter.ALL
+                }
+                binding.filter.contentDescription = "Filter: ${item.title}"
+                renderLibrary()
+                true
+            }
+            show()
         }
     }
 
@@ -143,12 +215,24 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Player is starting…", Toast.LENGTH_SHORT).show()
             return
         }
-        val index = allSongs.indexOfFirst { it.id == song.id }
+        val queue = visibleSongs()
+        val index = queue.indexOfFirst { it.id == song.id }
         if (index < 0) return
-        activeController.setMediaItems(allSongs.map(Song::asMediaItem), index, 0)
+        activeController.setMediaItems(queue.map(Song::asMediaItem), index, 0)
         activeController.prepare()
         activeController.play()
         updatePlaybackUi()
+    }
+
+    private fun playCollection(collection: MusicCollection) {
+        val activeController = controller ?: run {
+            Toast.makeText(this, "Player is starting…", Toast.LENGTH_SHORT).show()
+            return
+        }
+        activeController.setMediaItems(collection.songs.map(Song::asMediaItem), 0, 0)
+        activeController.prepare()
+        activeController.play()
+        openPlayer()
     }
 
     private fun togglePlayback() {
@@ -167,13 +251,7 @@ class MainActivity : AppCompatActivity() {
             if (activeController.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
         )
         binding.playPause.contentDescription = if (activeController.isPlaying) "Pause" else "Play"
-        adapter.submit(
-            if (binding.search.text.isNullOrBlank()) allSongs else allSongs.filter { song ->
-                val q = binding.search.text.toString()
-                song.title.contains(q, true) || song.artist.contains(q, true) || song.album.contains(q, true)
-            },
-            activeController.currentMediaItem?.mediaId
-        )
+        renderLibrary()
     }
 
     override fun onDestroy() {
@@ -183,3 +261,6 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+
+private enum class BrowseMode { SONGS, ALBUMS, ARTISTS }
+private enum class SourceFilter { ALL, DEVICE, FOLDERS }

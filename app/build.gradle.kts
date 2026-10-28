@@ -11,8 +11,8 @@ android {
         applicationId = "com.pulse.player"
         minSdk = 23
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.1"
     }
 
     compileOptions {
@@ -21,9 +21,17 @@ android {
     }
     buildFeatures { viewBinding = true; buildConfig = true }
     kotlinOptions { jvmTarget = "17" }
+    applicationVariants.all {
+        outputs.all {
+            if (name == "debug") {
+                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = "pulse-v1.1.apk"
+            }
+        }
+    }
 }
 
 dependencies {
+    implementation(files("../DiscordSocialSdk-1.10.19337/discord_social_sdk/lib/release/discord_partner_sdk.aar"))
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")

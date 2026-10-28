@@ -76,8 +76,23 @@
             android:layout_marginTop="8dp"
             android:text="Add music folder" />
         <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DISCORD COVER SHARING" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
+        <TextView android:id="@+id/cloudflareStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/pulse_muted" android:textSize="14sp" />
+        <Button
+            android:id="@+id/enableCloudflareCoverSharing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Enable cover sharing" />
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ABOUT" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
         <TextView android:id="@+id/version" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="@color/pulse_ink" android:textSize="16sp" />
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Open-source local music player" android:textColor="@color/pulse_muted" android:textSize="14sp" />
+        <Button
+            android:id="@+id/openReleases"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Download latest version" />
     </LinearLayout>
 </ScrollView>

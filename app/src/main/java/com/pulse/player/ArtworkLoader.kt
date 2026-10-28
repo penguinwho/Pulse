@@ -41,6 +41,23 @@ object ArtworkLoader {
         }
     }
 
+    fun embeddedArtwork(context: Context, uri: Uri?, onComplete: (ByteArray?, String?) -> Unit) {
+        if (uri == null) {
+            onComplete(null, null)
+            return
+        }
+        executor.execute {
+            val bytes = runCatching {
+                MediaMetadataRetriever().use { retriever ->
+                    retriever.setDataSource(context, uri)
+                    retriever.embeddedPicture
+                }
+            }.getOrNull()
+            val mimeType = bytes?.let(::coverMimeType)
+            onComplete(bytes, mimeType)
+        }
+    }
+
     /** Creates a high-quality local 4× bitmap, capped at 2048px to avoid excess memory use. */
     fun upscale(context: Context, uri: Uri?, target: ImageView, onComplete: (Boolean) -> Unit) {
         if (uri == null) { onComplete(false); return }
@@ -65,6 +82,16 @@ object ArtworkLoader {
             }
         }
     }.getOrNull()
+
+    private fun coverMimeType(bytes: ByteArray): String? = when {
+        bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte() -> "image/jpeg"
+        bytes.size >= 8 && bytes.copyOfRange(0, 8).contentEquals(
+            byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
+        ) -> "image/png"
+        bytes.size >= 12 && String(bytes, 0, 4, Charsets.US_ASCII) == "RIFF" &&
+            String(bytes, 8, 4, Charsets.US_ASCII) == "WEBP" -> "image/webp"
+        else -> null
+    }
 
     private fun scaleUp(source: Bitmap): Bitmap {
         val scale = minOf(4f, 2048f / maxOf(source.width, source.height).toFloat())

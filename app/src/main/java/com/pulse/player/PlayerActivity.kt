@@ -32,6 +32,8 @@ class PlayerActivity : AppCompatActivity() {
         override fun onMediaItemTransition(mediaItem: androidx.media3.common.MediaItem?, reason: Int) = updateUi()
         override fun onIsPlayingChanged(isPlaying: Boolean) = updateUi()
         override fun onPlaybackStateChanged(playbackState: Int) = updateUi()
+        override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) = updateUi()
+        override fun onRepeatModeChanged(repeatMode: Int) = updateUi()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +47,8 @@ class PlayerActivity : AppCompatActivity() {
         binding.previous.setOnClickListener { controller?.seekToPreviousMediaItem() }
         binding.next.setOnClickListener { controller?.seekToNextMediaItem() }
         binding.playPause.setOnClickListener { controller?.let { if (it.isPlaying) it.pause() else it.play() } }
+        binding.shuffle.setOnClickListener { controller?.let { it.shuffleModeEnabled = !it.shuffleModeEnabled } }
+        binding.repeat.setOnClickListener { cycleRepeatMode() }
         binding.upscaleCover.setOnClickListener { upscaleCover() }
         binding.progress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
@@ -82,10 +86,31 @@ class PlayerActivity : AppCompatActivity() {
             binding.currentTime.text = clock(current.currentPosition)
         }
         binding.playPause.setImageResource(if (current.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play)
+        binding.shuffle.isSelected = current.shuffleModeEnabled
+        binding.shuffle.contentDescription = if (current.shuffleModeEnabled) "Shuffle on" else "Shuffle off"
+        binding.repeat.isSelected = current.repeatMode != Player.REPEAT_MODE_OFF
+        binding.repeat.setImageResource(
+            if (current.repeatMode == Player.REPEAT_MODE_ONE) R.drawable.ic_repeat_one else R.drawable.ic_repeat
+        )
+        binding.repeat.contentDescription = when (current.repeatMode) {
+            Player.REPEAT_MODE_ONE -> "Repeat one"
+            Player.REPEAT_MODE_ALL -> "Repeat all"
+            else -> "Repeat off"
+        }
         ArtworkLoader.load(this, current.currentMediaItem?.localConfiguration?.uri, binding.artwork)
     }
 
     private fun clock(ms: Long) = DateUtils.formatElapsedTime(ms / 1_000)
+
+    private fun cycleRepeatMode() {
+        controller?.let { player ->
+            player.repeatMode = when (player.repeatMode) {
+                Player.REPEAT_MODE_OFF -> Player.REPEAT_MODE_ALL
+                Player.REPEAT_MODE_ALL -> Player.REPEAT_MODE_ONE
+                else -> Player.REPEAT_MODE_OFF
+            }
+        }
+    }
 
     private fun applySystemBarInsets() {
         val padding = resources.getDimensionPixelSize(R.dimen.screen_horizontal_padding)

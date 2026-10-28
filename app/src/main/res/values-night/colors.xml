@@ -6,4 +6,6 @@
     <color name="pulse_lilac_soft">#30243A</color>
     <color name="pulse_muted">#CEC2D2</color>
     <color name="pulse_divider">#3D3541</color>
+    <color name="pulse_nav_inactive">#CFC4D3</color>
+    <color name="pulse_nav_active">#E7D3FF</color>
 </resources>

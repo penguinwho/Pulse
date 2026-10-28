@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pulse_ink">#16111D</color>
+    <color name="pulse_surface">#FFFBFF</color>
+    <color name="pulse_lilac">#7654A5</color>
+    <color name="pulse_lilac_soft">#EEE4FF</color>
+    <color name="pulse_muted">#665E6B</color>
+</resources>

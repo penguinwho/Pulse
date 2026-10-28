@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatDelegate
 object AppPreferences {
     private const val FILE = "pulse_settings"
     private const val FOLDERS = "music_folders"
+    private const val FAVORITES = "favorite_songs"
     private const val THEME = "theme"
     const val SYSTEM = "system"
     const val LIGHT = "light"
@@ -23,6 +24,15 @@ object AppPreferences {
 
     fun removeFolder(context: Context, uri: Uri) {
         prefs(context).edit().putStringSet(FOLDERS, folders(context) - uri.toString()).apply()
+    }
+
+    fun isFavorite(context: Context, songId: String): Boolean =
+        prefs(context).getStringSet(FAVORITES, emptySet()).orEmpty().contains(songId)
+
+    fun setFavorite(context: Context, songId: String, favorite: Boolean) {
+        val updated = prefs(context).getStringSet(FAVORITES, emptySet()).orEmpty().toMutableSet()
+        if (favorite) updated.add(songId) else updated.remove(songId)
+        prefs(context).edit().putStringSet(FAVORITES, updated).apply()
     }
 
     fun theme(context: Context) = prefs(context).getString(THEME, SYSTEM) ?: SYSTEM

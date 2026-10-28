@@ -6,7 +6,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.pulse.player.databinding.ItemSongBinding
 import java.util.Locale
 
-class SongAdapter(private val onSelected: (Song) -> Unit) : RecyclerView.Adapter<SongAdapter.Holder>() {
+class SongAdapter(
+    private val onSelected: (Song) -> Unit,
+    private val onFavoriteToggled: (Song) -> Unit
+) : RecyclerView.Adapter<SongAdapter.Holder>() {
     private var songs: List<Song> = emptyList()
     private var activeId: String? = null
 
@@ -28,10 +31,14 @@ class SongAdapter(private val onSelected: (Song) -> Unit) : RecyclerView.Adapter
             binding.songTitle.text = song.title
             binding.songDetails.text = listOf(song.artist, song.album).filter { it.isNotBlank() }.joinToString(" · ")
             binding.songDuration.text = if (song.durationMs > 0) formatDuration(song.durationMs) else "Folder"
+            val favorite = AppPreferences.isFavorite(binding.root.context, song.id)
+            binding.favorite.isSelected = favorite
+            binding.favorite.contentDescription = if (favorite) "Remove from favorites" else "Add to favorites"
             binding.songTitle.setTextColor(binding.root.context.getColor(
                 if (song.id == activeId) R.color.pulse_lilac else R.color.pulse_ink
             ))
             binding.songRow.setOnClickListener { onSelected(song) }
+            binding.favorite.setOnClickListener { onFavoriteToggled(song) }
         }
     }
 

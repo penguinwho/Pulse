@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         applySystemBarInsets()
 
-        songAdapter = SongAdapter(::playSong)
+        songAdapter = SongAdapter(::playSong, ::toggleFavorite)
         collectionAdapter = CollectionAdapter(::playCollection)
         binding.songs.layoutManager = LinearLayoutManager(this)
         binding.songs.adapter = songAdapter
@@ -153,6 +153,7 @@ class MainActivity : AppCompatActivity() {
                 SourceFilter.ALL -> true
                 SourceFilter.DEVICE -> !song.fromAddedFolder
                 SourceFilter.FOLDERS -> song.fromAddedFolder
+                SourceFilter.FAVORITES -> AppPreferences.isFavorite(this, song.id)
             }
             sourceMatches && (needle.isBlank() ||
             song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true)
@@ -204,10 +205,12 @@ class MainActivity : AppCompatActivity() {
             menu.add(0, 1, 0, "All music")
             menu.add(0, 2, 1, "Device library")
             menu.add(0, 3, 2, "Added folders")
+            menu.add(0, 4, 3, "Favorites")
             setOnMenuItemClickListener { item ->
                 sourceFilter = when (item.itemId) {
                     2 -> SourceFilter.DEVICE
                     3 -> SourceFilter.FOLDERS
+                    4 -> SourceFilter.FAVORITES
                     else -> SourceFilter.ALL
                 }
                 binding.filter.contentDescription = "Filter: ${item.title}"
@@ -263,6 +266,11 @@ class MainActivity : AppCompatActivity() {
         controller?.let { if (it.isPlaying) it.pause() else it.play() }
     }
 
+    private fun toggleFavorite(song: Song) {
+        AppPreferences.setFavorite(this, song.id, !AppPreferences.isFavorite(this, song.id))
+        renderLibrary()
+    }
+
     private fun openPlayer() = startActivity(Intent(this, PlayerActivity::class.java))
 
     private fun updatePlaybackUi() {
@@ -287,4 +295,4 @@ class MainActivity : AppCompatActivity() {
 }
 
 private enum class BrowseMode { SONGS, ALBUMS, ARTISTS }
-private enum class SourceFilter { ALL, DEVICE, FOLDERS }
+private enum class SourceFilter { ALL, DEVICE, FOLDERS, FAVORITES }

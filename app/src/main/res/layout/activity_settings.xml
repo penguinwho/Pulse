@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@color/pulse_surface">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/back"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Back"
+                android:src="@android:drawable/ic_media_previous" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Settings"
+                android:textColor="@color/pulse_ink"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="APPEARANCE"
+            android:textColor="@color/pulse_lilac"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+        <RadioGroup
+            android:id="@+id/themeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp">
+            <RadioButton android:id="@+id/themeSystem" android:layout_width="match_parent" android:layout_height="48dp" android:text="Use device theme" android:textColor="@color/pulse_ink" />
+            <RadioButton android:id="@+id/themeLight" android:layout_width="match_parent" android:layout_height="48dp" android:text="Light" android:textColor="@color/pulse_ink" />
+            <RadioButton android:id="@+id/themeDark" android:layout_width="match_parent" android:layout_height="48dp" android:text="Dark" android:textColor="@color/pulse_ink" />
+        </RadioGroup>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MUSIC FOLDERS"
+            android:textColor="@color/pulse_lilac"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:text="Pulse scans these folders in addition to your Android music library."
+            android:textColor="@color/pulse_muted"
+            android:textSize="14sp" />
+        <LinearLayout
+            android:id="@+id/folders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" />
+        <Button
+            android:id="@+id/addFolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Add music folder" />
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ABOUT" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
+        <TextView android:id="@+id/version" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:textColor="@color/pulse_ink" android:textSize="16sp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Open-source local music player" android:textColor="@color/pulse_muted" android:textSize="14sp" />
+    </LinearLayout>
+</ScrollView>

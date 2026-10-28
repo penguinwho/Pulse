@@ -2,6 +2,7 @@ package com.pulse.player
 
 import android.Manifest
 import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -29,8 +30,12 @@ class MainActivity : AppCompatActivity() {
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) loadLibrary() else showPermissionState()
+        if (granted || AppPreferences.folders(this).isNotEmpty()) loadLibrary() else showPermissionState()
     }
+
+    private val settingsLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { loadLibrary() }
 
     private val playerListener = object : Player.Listener {
         override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = updatePlaybackUi()
@@ -39,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppPreferences.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -48,12 +54,17 @@ class MainActivity : AppCompatActivity() {
         binding.songs.adapter = adapter
         binding.search.addTextChangedListener { filter(it?.toString().orEmpty()) }
         binding.grantAccess.setOnClickListener { requestLibraryPermission() }
+        binding.settings.setOnClickListener {
+            settingsLauncher.launch(Intent(this, SettingsActivity::class.java))
+        }
         binding.playPause.setOnClickListener { togglePlayback() }
+        binding.nowPlayingInfo.setOnClickListener { openPlayer() }
+        binding.nowArtwork.setOnClickListener { openPlayer() }
         binding.next.setOnClickListener { controller?.seekToNextMediaItem() }
         binding.previous.setOnClickListener { controller?.seekToPreviousMediaItem() }
 
         connectPlayer()
-        if (hasLibraryPermission()) loadLibrary() else showPermissionState()
+        if (hasLibraryPermission() || AppPreferences.folders(this).isNotEmpty()) loadLibrary() else showPermissionState()
     }
 
     private fun connectPlayer() {
@@ -83,7 +94,10 @@ class MainActivity : AppCompatActivity() {
     private fun loadLibrary() {
         binding.emptyState.visibility = View.GONE
         Thread {
-            val result = MediaStoreRepository(applicationContext).songs()
+            val result = MediaStoreRepository(applicationContext).songs(
+                includeMediaStore = hasLibraryPermission(),
+                folders = AppPreferences.folderUris(this)
+            )
             runOnUiThread {
                 allSongs = result
                 filter(binding.search.text?.toString().orEmpty())
@@ -97,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         val visible = if (needle.isBlank()) allSongs else allSongs.filter { song ->
             song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true)
         }
-        val currentId = controller?.currentMediaItem?.mediaId?.toLongOrNull()
+        val currentId = controller?.currentMediaItem?.mediaId
         adapter.submit(visible, currentId)
         binding.songsLabel.text = if (needle.isBlank()) "SONGS · ${allSongs.size}" else "RESULTS · ${visible.size}"
         binding.emptyState.visibility = if (allSongs.isNotEmpty() && visible.isEmpty()) View.VISIBLE else View.GONE
@@ -141,11 +155,14 @@ class MainActivity : AppCompatActivity() {
         controller?.let { if (it.isPlaying) it.pause() else it.play() }
     }
 
+    private fun openPlayer() = startActivity(Intent(this, PlayerActivity::class.java))
+
     private fun updatePlaybackUi() {
         val activeController = controller ?: return
         val media = activeController.currentMediaItem?.mediaMetadata
         binding.nowTitle.text = media?.title?.toString() ?: "Nothing playing"
         binding.nowArtist.text = media?.artist?.toString() ?: "Choose a song from your library"
+        ArtworkLoader.load(this, activeController.currentMediaItem?.localConfiguration?.uri, binding.nowArtwork)
         binding.playPause.setImageResource(
             if (activeController.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
         )
@@ -155,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                 val q = binding.search.text.toString()
                 song.title.contains(q, true) || song.artist.contains(q, true) || song.album.contains(q, true)
             },
-            activeController.currentMediaItem?.mediaId?.toLongOrNull()
+            activeController.currentMediaItem?.mediaId
         )
     }
 

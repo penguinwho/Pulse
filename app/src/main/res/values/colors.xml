@@ -5,4 +5,5 @@
     <color name="pulse_lilac">#7654A5</color>
     <color name="pulse_lilac_soft">#EEE4FF</color>
     <color name="pulse_muted">#665E6B</color>
+    <color name="pulse_divider">#E8DFEB</color>
 </resources>

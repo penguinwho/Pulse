@@ -8,6 +8,7 @@
     android:orientation="horizontal"
     android:paddingVertical="8dp">
     <ImageView
+        android:id="@+id/songArtwork"
         android:layout_width="52dp"
         android:layout_height="52dp"
         android:contentDescription="Album artwork"

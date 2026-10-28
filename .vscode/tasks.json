@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run Pulse on Android",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "ADB=/home/intel/Android/Sdk/platform-tools/adb; $ADB kill-server; $ADB start-server; $ADB wait-for-device; ./gradlew :app:installDebug && $ADB shell am start -n com.pulse.player/.MainActivity"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "JAVA_HOME": "/opt/android-studio/jbr"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gradle"],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      }
+    }
+  ]
+}

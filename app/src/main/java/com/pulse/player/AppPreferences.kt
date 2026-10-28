@@ -8,6 +8,7 @@ object AppPreferences {
     private const val FILE = "pulse_settings"
     private const val FOLDERS = "music_folders"
     private const val FAVORITES = "favorite_songs"
+    private const val CLOUDFLARE_COVER_SESSION = "cloudflare_cover_session"
     private const val THEME = "theme"
     const val SYSTEM = "system"
     const val LIGHT = "light"
@@ -33,6 +34,13 @@ object AppPreferences {
         val updated = prefs(context).getStringSet(FAVORITES, emptySet()).orEmpty().toMutableSet()
         if (favorite) updated.add(songId) else updated.remove(songId)
         prefs(context).edit().putStringSet(FAVORITES, updated).apply()
+    }
+
+    fun cloudflareCoverSession(context: Context): String =
+        prefs(context).getString(CLOUDFLARE_COVER_SESSION, "").orEmpty()
+
+    fun setCloudflareCoverSession(context: Context, session: String) {
+        prefs(context).edit().putString(CLOUDFLARE_COVER_SESSION, session.trim()).apply()
     }
 
     fun theme(context: Context) = prefs(context).getString(THEME, SYSTEM) ?: SYSTEM

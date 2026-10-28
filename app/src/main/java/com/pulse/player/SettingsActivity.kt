@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -20,6 +21,14 @@ class SettingsActivity : AppCompatActivity() {
     private val folderPicker = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let(::saveFolder)
     }
+    private val cloudflareAuthorization = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            Toast.makeText(this, "Cover sharing enabled", Toast.LENGTH_SHORT).show()
+        }
+        renderCloudflareStatus()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AppPreferences.applyTheme(this)
@@ -30,6 +39,10 @@ class SettingsActivity : AppCompatActivity() {
         applySystemBarInsets()
         binding.back.setOnClickListener { finish() }
         binding.addFolder.setOnClickListener { folderPicker.launch(null) }
+        binding.openReleases.setOnClickListener { openReleasesPage() }
+        binding.enableCloudflareCoverSharing.setOnClickListener {
+            cloudflareAuthorization.launch(Intent(this, CloudflareCoverAuthActivity::class.java))
+        }
         binding.version.text = "Pulse ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
         when (AppPreferences.theme(this)) {
             AppPreferences.LIGHT -> binding.themeLight.isChecked = true
@@ -81,6 +94,12 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun openReleasesPage() {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/penguinwho/Pulse/releases"))
+        if (intent.resolveActivity(packageManager) != null) startActivity(intent)
+        else Toast.makeText(this, "No browser is available", Toast.LENGTH_SHORT).show()
+    }
+
     private fun applySystemBarInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.settingsRoot) { view, insets ->
             val bars = insets.getInsets(
@@ -90,5 +109,18 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
         ViewCompat.requestApplyInsets(binding.settingsRoot)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        renderCloudflareStatus()
+    }
+
+    private fun renderCloudflareStatus() {
+        binding.cloudflareStatus.text = if (AppPreferences.cloudflareCoverSession(this).isBlank()) {
+            "Cover sharing is off. Enabling it verifies this device before it can upload cover art."
+        } else {
+            "Cover sharing is enabled. Embedded album art is uploaded only while a song is playing."
+        }
     }
 }

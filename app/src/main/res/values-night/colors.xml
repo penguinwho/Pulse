@@ -8,4 +8,5 @@
     <color name="pulse_divider">#3D3541</color>
     <color name="pulse_nav_inactive">#CFC4D3</color>
     <color name="pulse_nav_active">#E7D3FF</color>
+    <color name="pulse_nav_selected_surface">#4D3765</color>
 </resources>

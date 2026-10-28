@@ -10,6 +10,9 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -34,8 +37,10 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         AppPreferences.applyTheme(this)
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySystemBarInsets()
         binding.close.setOnClickListener { finish() }
         binding.previous.setOnClickListener { controller?.seekToPreviousMediaItem() }
         binding.next.setOnClickListener { controller?.seekToNextMediaItem() }
@@ -81,6 +86,18 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun clock(ms: Long) = DateUtils.formatElapsedTime(ms / 1_000)
+
+    private fun applySystemBarInsets() {
+        val padding = resources.getDimensionPixelSize(R.dimen.screen_horizontal_padding)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.playerRoot) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(padding + bars.left, padding + bars.top, padding + bars.right, padding + bars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.playerRoot)
+    }
 
     private fun upscaleCover() {
         val uri = controller?.currentMediaItem?.localConfiguration?.uri

@@ -9,9 +9,53 @@ Pulse is a small, private-by-default Android music player. It plays audio alread
 - Maintains a searchable song library and a play queue
 - Continues playback in the background with lock-screen and notification controls
 
-## Build
+## Build an APK
 
-Open this folder in Android Studio Ladybug or newer, let it install the Android SDK requested by the project, then run the `app` configuration on an Android 8.0+ device or emulator. The app asks only for audio-library access.
+Pulse supports Android 6.0 (API 23) and newer. To build it, install Android Studio and a Java 17 JDK. Android Studio includes the Android SDK manager used by the project.
+
+### Build with Android Studio
+
+1. Open this repository folder in Android Studio.
+2. When prompted, allow Gradle to sync and install the Android SDK components for API 35.
+3. Select the `app` run configuration.
+4. Choose **Build > Build APK(s)**.
+5. When the build finishes, select **locate** in the notification, or find the debug APK here:
+
+   `app/build/outputs/apk/debug/app-debug.apk`
+
+You can copy that APK to an Android device and open it to install it. The device may ask you to allow installs from the app used to open the file.
+
+### Build from the command line
+
+From the repository root, run:
+
+```bash
+./gradlew assembleDebug
+```
+
+On Windows, run:
+
+```bat
+gradlew.bat assembleDebug
+```
+
+The APK is created at:
+
+```text
+app/build/outputs/apk/debug/app-debug.apk
+```
+
+To install it on a connected Android device with USB debugging enabled, run:
+
+```bash
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+### Create a release APK
+
+For an APK you intend to share, use **Build > Generate Signed Bundle / APK** in Android Studio. Choose **APK**, create or select a keystore, choose the `release` variant, and finish the wizard. Keep the keystore and its passwords private; they are required for future updates to the same app.
+
+The project does not include a signing key, so `assembleRelease` alone creates an unsigned release APK that cannot be installed normally.
 
 ## License
 

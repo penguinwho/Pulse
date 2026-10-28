@@ -12,6 +12,9 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -50,8 +53,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         AppPreferences.applyTheme(this)
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        applySystemBarInsets()
 
         songAdapter = SongAdapter(::playSong)
         collectionAdapter = CollectionAdapter(::playCollection)
@@ -92,6 +97,25 @@ class MainActivity : AppCompatActivity() {
                 updatePlaybackUi()
             }, ContextCompat.getMainExecutor(this))
         }
+    }
+
+    /** Keeps controls clear of cut-outs, gesture areas, and 3-button navigation. */
+    private fun applySystemBarInsets() {
+        val horizontalPadding = resources.getDimensionPixelSize(R.dimen.screen_horizontal_padding)
+        val topPadding = resources.getDimensionPixelSize(R.dimen.screen_top_padding)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mainRoot) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(
+                horizontalPadding + bars.left,
+                topPadding + bars.top,
+                horizontalPadding + bars.right,
+                bars.bottom
+            )
+            insets
+        }
+        ViewCompat.requestApplyInsets(binding.mainRoot)
     }
 
     private fun hasLibraryPermission(): Boolean = ContextCompat.checkSelfPermission(

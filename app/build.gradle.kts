@@ -11,8 +11,8 @@ android {
         applicationId = "com.pulse.player"
         minSdk = 23
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.1"
+        versionCode = 4
+        versionName = "1.2"
     }
 
     compileOptions {
@@ -24,7 +24,7 @@ android {
     applicationVariants.all {
         outputs.all {
             if (name == "debug") {
-                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = "pulse-v1.1.apk"
+                (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName = "pulse-v1.2.apk"
             }
         }
     }

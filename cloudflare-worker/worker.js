@@ -43,7 +43,7 @@ async function validTurnstile(token, secret, ip) {
   const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
   const result = await response.json();
   return result.success === true;
-}
+} 
 
 function authorizationPage() {
   return new Response(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></head><body><p>Verifying cover sharing…</p><div class="cf-turnstile" data-sitekey="${TURNSTILE_SITEKEY}" data-callback="authorized"></div><script>async function authorized(token) { const response = await fetch('/session', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); const data = await response.json(); if (data.session) location.href = 'pulse://cloudflare-authorized?session=' + encodeURIComponent(data.session); }</script></body></html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });

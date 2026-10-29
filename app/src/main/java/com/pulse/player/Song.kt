@@ -11,7 +11,8 @@ data class Song(
     val album: String,
     val durationMs: Long,
     val uri: Uri,
-    val fromAddedFolder: Boolean = false
+    val fromAddedFolder: Boolean = false,
+    val fromStreamingServer: Boolean = false
 ) {
     fun asMediaItem() = MediaItem.Builder()
         .setMediaId(id.toString())

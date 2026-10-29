@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatDelegate
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 
 object AppPreferences {
     private const val FILE = "pulse_settings"
@@ -12,14 +13,24 @@ object AppPreferences {
     private const val FAVORITES = "favorite_songs"
     private const val CLOUDFLARE_COVER_SESSION = "cloudflare_cover_session"
     private const val THEME = "theme"
+    private const val ACCENT = "accent"
+    private const val GRADIENT_START = "gradient_start"
+    private const val GRADIENT_END = "gradient_end"
     private const val HISTORY = "listening_history"
     private const val PLAYLISTS = "playlists"
     private const val SLEEP_TIMER_END = "sleep_timer_end"
     private const val DISCORD_ENABLED = "discord_enabled"
     private const val EQUALIZER_PRESET = "equalizer_preset"
+    private const val SERVER_URL = "music_server_url"
+    private const val SERVER_USERNAME = "music_server_username"
+    private const val SERVER_TOKEN = "music_server_token"
+    private const val SERVER_SALT = "music_server_salt"
     const val SYSTEM = "system"
     const val LIGHT = "light"
     const val DARK = "dark"
+    const val AMETHYST = "amethyst"
+    const val OCEAN = "ocean"
+    const val SUNSET = "sunset"
 
     private fun prefs(context: Context) = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
 
@@ -95,6 +106,29 @@ object AppPreferences {
     fun equalizerPreset(context: Context): String = prefs(context).getString(EQUALIZER_PRESET, "Normal").orEmpty()
     fun setEqualizerPreset(context: Context, preset: String) = prefs(context).edit().putString(EQUALIZER_PRESET, preset).apply()
 
+    fun hasMusicServer(context: Context): Boolean = musicServerUrl(context).isNotBlank() && musicServerToken(context).isNotBlank()
+    fun musicServerUrl(context: Context): String = prefs(context).getString(SERVER_URL, "").orEmpty()
+    fun musicServerUsername(context: Context): String = prefs(context).getString(SERVER_USERNAME, "").orEmpty()
+    fun musicServerToken(context: Context): String = prefs(context).getString(SERVER_TOKEN, "").orEmpty()
+    fun musicServerSalt(context: Context): String = prefs(context).getString(SERVER_SALT, "").orEmpty()
+
+    /** Stores a Subsonic token, never the supplied account password. */
+    fun saveMusicServer(context: Context, url: String, username: String, password: String) {
+        val salt = java.util.UUID.randomUUID().toString().replace("-", "")
+        val token = MessageDigest.getInstance("MD5")
+            .digest((password + salt).toByteArray())
+            .joinToString("") { "%02x".format(it) }
+        prefs(context).edit()
+            .putString(SERVER_URL, url.trim().trimEnd('/'))
+            .putString(SERVER_USERNAME, username.trim())
+            .putString(SERVER_TOKEN, token)
+            .putString(SERVER_SALT, salt)
+            .apply()
+    }
+
+    fun clearMusicServer(context: Context) = prefs(context).edit()
+        .remove(SERVER_URL).remove(SERVER_USERNAME).remove(SERVER_TOKEN).remove(SERVER_SALT).apply()
+
     fun theme(context: Context) = prefs(context).getString(THEME, SYSTEM) ?: SYSTEM
     fun setTheme(context: Context, value: String) {
         prefs(context).edit().putString(THEME, value).apply()
@@ -107,5 +141,27 @@ object AppPreferences {
             DARK -> AppCompatDelegate.MODE_NIGHT_YES
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         })
+    }
+
+    fun accent(context: Context): String = prefs(context).getString(ACCENT, AMETHYST) ?: AMETHYST
+    fun setAccent(context: Context, value: String) {
+        prefs(context).edit().putString(ACCENT, value).apply()
+    }
+
+    fun customGradient(context: Context): Pair<String, String>? {
+        val start = prefs(context).getString(GRADIENT_START, "").orEmpty()
+        val end = prefs(context).getString(GRADIENT_END, "").orEmpty()
+        return if (start.isBlank() || end.isBlank()) null else start to end
+    }
+
+    fun setCustomGradient(context: Context, start: String, end: String) {
+        prefs(context).edit()
+            .putString(GRADIENT_START, start.trim())
+            .putString(GRADIENT_END, end.trim())
+            .apply()
+    }
+
+    fun clearCustomGradient(context: Context) {
+        prefs(context).edit().remove(GRADIENT_START).remove(GRADIENT_END).apply()
     }
 }

@@ -33,7 +33,7 @@ The SDK download is available in your Discord application under **Games > Social
 4. Choose **Build > Build APK(s)**.
 5. When the build finishes, select **locate** in the notification, or find the debug APK here:
 
-   `app/build/outputs/apk/debug/pulse-v1.1.apk`
+   `app/build/outputs/apk/debug/pulse-v1.2.apk`
 
 You can copy that APK to an Android device and open it to install it. The device may ask you to allow installs from the app used to open the file.
 
@@ -54,13 +54,13 @@ gradlew.bat assembleDebug
 The APK is created at:
 
 ```text
-app/build/outputs/apk/debug/pulse-v1.1.apk
+app/build/outputs/apk/debug/pulse-v1.2.apk
 ```
 
 To install it on a connected Android device with USB debugging enabled, run:
 
 ```bash
-adb install -r app/build/outputs/apk/debug/pulse-v1.1.apk
+adb install -r app/build/outputs/apk/debug/pulse-v1.2.apk
 ```
 
 ### Create a release APK

@@ -4,8 +4,12 @@ import android.Manifest
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -21,6 +25,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.common.util.concurrent.ListenableFuture
 import com.pulse.player.databinding.ActivityMainBinding
 
@@ -33,6 +38,51 @@ class MainActivity : AppCompatActivity() {
     private var controllerFuture: ListenableFuture<MediaController>? = null
     private var browseMode = BrowseMode.SONGS
     private var sourceFilter = SourceFilter.ALL
+    private var selectedPlaylist: String? = null
+
+    private val libraryGestures by lazy {
+        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(event: MotionEvent) = true
+
+            override fun onFling(
+                start: MotionEvent?, end: MotionEvent, velocityX: Float, velocityY: Float
+            ): Boolean {
+                val first = start ?: return false
+                val deltaX = end.x - first.x
+                val deltaY = end.y - first.y
+                if (kotlin.math.abs(deltaX) < 72 * resources.displayMetrics.density ||
+                    kotlin.math.abs(deltaX) <= kotlin.math.abs(deltaY)) return false
+                changeBrowseMode(if (deltaX < 0) 1 else -1)
+                return true
+            }
+        })
+    }
+
+    private val miniPlayerGestures by lazy {
+        GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onDown(event: MotionEvent) = true
+
+            override fun onFling(
+                start: MotionEvent?, end: MotionEvent, velocityX: Float, velocityY: Float
+            ): Boolean {
+                val first = start ?: return false
+                val deltaX = end.x - first.x
+                val deltaY = end.y - first.y
+                val threshold = 56 * resources.displayMetrics.density
+                when {
+                    kotlin.math.abs(deltaX) > threshold && kotlin.math.abs(deltaX) > kotlin.math.abs(deltaY) -> {
+                        if (deltaX < 0) controller?.seekToNextMediaItem() else controller?.seekToPreviousMediaItem()
+                        return true
+                    }
+                    deltaY < -threshold && kotlin.math.abs(deltaY) > kotlin.math.abs(deltaX) -> {
+                        openPlayer()
+                        return true
+                    }
+                }
+                return false
+            }
+        })
+    }
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -56,6 +106,12 @@ class MainActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            binding.mainBackgroundArtwork.setRenderEffect(
+                RenderEffect.createBlurEffect(42f, 42f, Shader.TileMode.CLAMP)
+            )
+        }
+        applyAppearance()
         applySystemBarInsets()
 
         songAdapter = SongAdapter(::playSong, ::toggleFavorite)
@@ -64,9 +120,7 @@ class MainActivity : AppCompatActivity() {
         binding.songs.adapter = songAdapter
         binding.search.addTextChangedListener { renderLibrary() }
         binding.grantAccess.setOnClickListener { requestLibraryPermission() }
-        binding.settings.setOnClickListener {
-            settingsLauncher.launch(Intent(this, SettingsActivity::class.java))
-        }
+        binding.settings.setOnClickListener { openSettings() }
         binding.playPause.setOnClickListener { togglePlayback() }
         binding.nowPlayingInfo.setOnClickListener { openPlayer() }
         binding.nowArtwork.setOnClickListener { openPlayer() }
@@ -76,6 +130,16 @@ class MainActivity : AppCompatActivity() {
         binding.navSongs.setOnClickListener { selectBrowseMode(BrowseMode.SONGS) }
         binding.navAlbums.setOnClickListener { selectBrowseMode(BrowseMode.ALBUMS) }
         binding.navArtists.setOnClickListener { selectBrowseMode(BrowseMode.ARTISTS) }
+        binding.nowPlaying.setOnTouchListener { _, event ->
+            miniPlayerGestures.onTouchEvent(event)
+            false
+        }
+        binding.songs.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(view: RecyclerView, event: MotionEvent): Boolean {
+                libraryGestures.onTouchEvent(event)
+                return false
+            }
+        })
         selectBrowseMode(BrowseMode.SONGS)
 
         connectPlayer()
@@ -97,7 +161,7 @@ class MainActivity : AppCompatActivity() {
     private fun applySystemBarInsets() {
         val horizontalPadding = resources.getDimensionPixelSize(R.dimen.screen_horizontal_padding)
         val topPadding = resources.getDimensionPixelSize(R.dimen.screen_top_padding)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.mainRoot) { view, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.mainContent) { view, insets ->
             val bars = insets.getInsets(
                 WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
@@ -128,10 +192,14 @@ class MainActivity : AppCompatActivity() {
     private fun loadLibrary() {
         binding.emptyState.visibility = View.GONE
         Thread {
-            val result = MediaStoreRepository(applicationContext).songs(
+            val localSongs = MediaStoreRepository(applicationContext).songs(
                 includeMediaStore = hasLibraryPermission(),
                 folders = AppPreferences.folderUris(this)
             )
+            val serverSongs = if (AppPreferences.hasMusicServer(this)) {
+                runCatching { SubsonicRepository(applicationContext).songs() }.getOrDefault(emptyList())
+            } else emptyList()
+            val result = localSongs + serverSongs
             runOnUiThread {
                 allSongs = result
                 renderLibrary()
@@ -142,16 +210,27 @@ class MainActivity : AppCompatActivity() {
 
     private fun visibleSongs(): List<Song> {
         val needle = binding.search.text?.toString().orEmpty().trim()
-        return allSongs.filter { song ->
+        val playlistIds = selectedPlaylist?.let { AppPreferences.playlists(this)[it].orEmpty() }
+        val recentIds = AppPreferences.recentSongIds(this)
+        val filtered = allSongs.filter { song ->
             val sourceMatches = when (sourceFilter) {
                 SourceFilter.ALL -> true
                 SourceFilter.DEVICE -> !song.fromAddedFolder
                 SourceFilter.FOLDERS -> song.fromAddedFolder
                 SourceFilter.FAVORITES -> AppPreferences.isFavorite(this, song.id)
+                SourceFilter.RECENT -> recentIds.contains(song.id)
+                SourceFilter.PLAYLIST -> playlistIds?.contains(song.id) == true
+                SourceFilter.STREAMING -> song.fromStreamingServer
             }
             sourceMatches && (needle.isBlank() ||
-            song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true)
+            song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true) ||
+                (song.fromAddedFolder && "added folder".contains(needle, true))
             )
+        }
+        return when (sourceFilter) {
+            SourceFilter.RECENT -> filtered.sortedBy { recentIds.indexOf(it.id) }
+            SourceFilter.PLAYLIST -> filtered.sortedBy { playlistIds?.indexOf(it.id) ?: Int.MAX_VALUE }
+            else -> filtered
         }
     }
 
@@ -200,13 +279,26 @@ class MainActivity : AppCompatActivity() {
             menu.add(0, 2, 1, "Device library")
             menu.add(0, 3, 2, "Added folders")
             menu.add(0, 4, 3, "Favorites")
+            menu.add(0, 5, 4, "Recently played")
+            if (AppPreferences.hasMusicServer(this@MainActivity)) menu.add(0, 6, 5, "Music server")
+            val playlists = AppPreferences.playlists(this@MainActivity)
+            if (playlists.isNotEmpty()) {
+                menu.add("Playlists")
+                playlists.keys.sorted().forEachIndexed { index, name ->
+                    menu.add(0, 100 + index, 10 + index, name)
+                }
+            }
             setOnMenuItemClickListener { item ->
                 sourceFilter = when (item.itemId) {
                     2 -> SourceFilter.DEVICE
                     3 -> SourceFilter.FOLDERS
                     4 -> SourceFilter.FAVORITES
+                    5 -> SourceFilter.RECENT
+                    6 -> SourceFilter.STREAMING
+                    in 100..999 -> SourceFilter.PLAYLIST
                     else -> SourceFilter.ALL
                 }
+                selectedPlaylist = if (sourceFilter == SourceFilter.PLAYLIST) item.title.toString() else null
                 binding.filter.contentDescription = "Filter: ${item.title}"
                 renderLibrary()
                 true
@@ -271,9 +363,34 @@ class MainActivity : AppCompatActivity() {
         binding.navAlbums.isSelected = mode == BrowseMode.ALBUMS
         binding.navArtists.isSelected = mode == BrowseMode.ARTISTS
         renderLibrary()
+        PulseAppearance.enter(binding.songs, distanceDp = 8f)
     }
 
-    private fun openPlayer() = startActivity(Intent(this, PlayerActivity::class.java))
+    private fun openPlayer() {
+        startActivity(Intent(this, PlayerActivity::class.java))
+        overridePendingTransition(R.anim.slide_up, R.anim.hold)
+    }
+
+    private fun openSettings() {
+        settingsLauncher.launch(Intent(this, SettingsActivity::class.java))
+        overridePendingTransition(R.anim.slide_in_right, R.anim.hold)
+    }
+
+    private fun applyAppearance() {
+        PulseAppearance.applyWindow(this)
+        PulseAppearance.applyGlass(
+            this,
+            binding.mainGlassOverlay,
+            glassViews = listOf(binding.search, binding.filter, binding.nowPlaying, binding.navigation),
+            accentText = listOf(binding.songsLabel),
+            accentIcons = listOf(binding.filter, binding.settings),
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized) applyAppearance()
+    }
 
     private fun updatePlaybackUi() {
         val activeController = controller ?: return
@@ -281,11 +398,18 @@ class MainActivity : AppCompatActivity() {
         binding.nowTitle.text = media?.title?.toString() ?: "Nothing playing"
         binding.nowArtist.text = media?.artist?.toString() ?: "Choose a song from your library"
         ArtworkLoader.load(this, activeController.currentMediaItem?.localConfiguration?.uri, binding.nowArtwork)
+        ArtworkLoader.load(this, activeController.currentMediaItem?.localConfiguration?.uri, binding.mainBackgroundArtwork)
         binding.playPause.setImageResource(
             if (activeController.isPlaying) android.R.drawable.ic_media_pause else android.R.drawable.ic_media_play
         )
         binding.playPause.contentDescription = if (activeController.isPlaying) "Pause" else "Play"
         renderLibrary()
+    }
+
+    private fun changeBrowseMode(direction: Int) {
+        val modes = BrowseMode.entries
+        val next = (browseMode.ordinal + direction).coerceIn(modes.indices)
+        if (next != browseMode.ordinal) selectBrowseMode(modes[next])
     }
 
     override fun onDestroy() {
@@ -297,4 +421,4 @@ class MainActivity : AppCompatActivity() {
 }
 
 private enum class BrowseMode { SONGS, ALBUMS, ARTISTS }
-private enum class SourceFilter { ALL, DEVICE, FOLDERS, FAVORITES }
+private enum class SourceFilter { ALL, DEVICE, FOLDERS, FAVORITES, RECENT, PLAYLIST, STREAMING }

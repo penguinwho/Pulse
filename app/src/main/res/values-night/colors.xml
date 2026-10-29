@@ -9,4 +9,8 @@
     <color name="pulse_nav_inactive">#CFC4D3</color>
     <color name="pulse_nav_active">#E7D3FF</color>
     <color name="pulse_nav_selected_surface">#4D3765</color>
+    <color name="pulse_glass_surface">#9E33283D</color>
+    <color name="pulse_glass_navigation">#CC261D31</color>
+    <color name="pulse_glass_row">#593A2F45</color>
+    <color name="pulse_glass_stroke">#4DFFFFFF</color>
 </resources>

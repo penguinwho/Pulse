@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="@color/pulse_surface">
+    android:background="@drawable/bg_glass_backdrop">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,6 +48,54 @@
             <RadioButton android:id="@+id/themeLight" android:layout_width="match_parent" android:layout_height="48dp" android:text="Light" android:textColor="@color/pulse_ink" />
             <RadioButton android:id="@+id/themeDark" android:layout_width="match_parent" android:layout_height="48dp" android:text="Dark" android:textColor="@color/pulse_ink" />
         </RadioGroup>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="GLASS COLOR"
+            android:textColor="@color/pulse_lilac"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+        <RadioGroup
+            android:id="@+id/accentGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp">
+            <RadioButton android:id="@+id/accentAmethyst" android:layout_width="match_parent" android:layout_height="48dp" android:text="Amethyst" android:textColor="@color/pulse_ink" />
+            <RadioButton android:id="@+id/accentOcean" android:layout_width="match_parent" android:layout_height="48dp" android:text="Ocean" android:textColor="@color/pulse_ink" />
+            <RadioButton android:id="@+id/accentSunset" android:layout_width="match_parent" android:layout_height="48dp" android:text="Sunset" android:textColor="@color/pulse_ink" />
+        </RadioGroup>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="GRADIENT BACKGROUND"
+            android:textColor="@color/pulse_lilac"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/gradientStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/pulse_muted"
+            android:textSize="14sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/customizeGradient"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Customize gradient" />
+            <Button
+                android:id="@+id/communityThemes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Community themes" />
+        </LinearLayout>
         <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
         <TextView
             android:layout_width="wrap_content"
@@ -76,7 +124,23 @@
             android:layout_marginTop="8dp"
             android:text="Add music folder" />
         <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DISCORD COVER SHARING" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="STREAMING MUSIC SERVER" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
+        <TextView android:id="@+id/musicServerStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/pulse_muted" android:textSize="14sp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <Button android:id="@+id/connectMusicServer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Connect server" />
+            <Button android:id="@+id/disconnectMusicServer" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="Disconnect" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginVertical="20dp" android:background="@color/pulse_divider" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DISCORD RICH PRESENCE" android:textColor="@color/pulse_lilac" android:textSize="12sp" android:textStyle="bold" />
+        <Switch
+            android:id="@+id/discordPresence"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:text="Share what I am listening to"
+            android:textColor="@color/pulse_ink"
+            android:thumbTint="@color/discord_switch_thumb_tint"
+            android:trackTint="@color/discord_switch_track_tint" />
         <TextView android:id="@+id/cloudflareStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="7dp" android:textColor="@color/pulse_muted" android:textSize="14sp" />
         <Button
             android:id="@+id/enableCloudflareCoverSharing"
@@ -94,5 +158,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Download latest version" />
+        <Button
+            android:id="@+id/checkForUpdates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Check for updates" />
     </LinearLayout>
 </ScrollView>

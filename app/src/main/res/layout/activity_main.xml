@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mainRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="20dp"
-    android:paddingTop="18dp"
-    android:background="@color/pulse_surface">
+    android:background="@drawable/bg_glass_backdrop">
+
+    <ImageView
+        android:id="@+id/mainBackgroundArtwork"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.20"
+        android:contentDescription=""
+        android:scaleType="centerCrop" />
+
+    <View
+        android:id="@+id/mainGlassOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_glass_backdrop" />
+
+    <LinearLayout
+        android:id="@+id/mainContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="18dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -58,7 +77,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="@drawable/bg_now_playing"
+            android:background="@drawable/bg_glass_surface"
             android:hint="Search your library"
             android:imeOptions="actionDone"
             android:inputType="text"
@@ -71,7 +90,7 @@
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:layout_marginStart="8dp"
-            android:background="@drawable/bg_now_playing"
+            android:background="@drawable/bg_glass_surface"
             android:contentDescription="Filter music source"
             android:src="@drawable/ic_filter" />
     </LinearLayout>
@@ -141,7 +160,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="10dp"
-        android:background="@drawable/bg_now_playing"
+        android:background="@drawable/bg_glass_surface"
         android:gravity="center_vertical"
         android:minHeight="88dp"
         android:orientation="horizontal"
@@ -209,7 +228,7 @@
         android:id="@+id/navigation"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:background="@color/pulse_lilac_soft"
+        android:background="@drawable/bg_glass_navigation"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="6dp">
@@ -294,4 +313,5 @@
                 android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    </LinearLayout>
+</FrameLayout>

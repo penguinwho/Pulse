@@ -2,7 +2,6 @@ package com.pulse.player
 
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,6 +36,14 @@ class SettingsActivity : AppCompatActivity() {
         }
         renderCloudflareStatus()
     }
+    private val gradientPalettes = listOf(
+        GradientPalette("Midnight", AppPreferences.AMETHYST, "#171024", "#342154"),
+        GradientPalette("Lagoon", AppPreferences.OCEAN, "#102A3C", "#125F70"),
+        GradientPalette("Rose", AppPreferences.SUNSET, "#351522", "#7F345A"),
+        GradientPalette("Citrus", AppPreferences.SUNSET, "#33240E", "#8A5D19"),
+        GradientPalette("Cloud", AppPreferences.OCEAN, "#243247", "#4C607D"),
+        GradientPalette("Monochrome", AppPreferences.AMETHYST, "#121214", "#333338")
+    )
     private val communityThemePacks = listOf(
         CommunityTheme("Aurora", AppPreferences.OCEAN, "#102337", "#0D6E78"),
         CommunityTheme("Velvet", AppPreferences.AMETHYST, "#20102C", "#6A2A72"),
@@ -63,7 +70,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.enableCloudflareCoverSharing.setOnClickListener {
             cloudflareAuthorization.launch(Intent(this, CloudflareCoverAuthActivity::class.java))
         }
-        binding.customizeGradient.setOnClickListener { showCustomGradientDialog() }
+        binding.customizeGradient.setOnClickListener { showGradientPalettePicker() }
         binding.communityThemes.setOnClickListener { showCommunityThemes() }
         binding.discordPresence.isChecked = AppPreferences.discordEnabled(this)
         binding.discordPresence.setOnCheckedChangeListener { _, enabled ->
@@ -220,65 +227,44 @@ class SettingsActivity : AppCompatActivity() {
         }.start()
     }
 
-    private fun showCustomGradientDialog() {
-        val padding = (20 * resources.displayMetrics.density).toInt()
-        val current = AppPreferences.customGradient(this)
-        val form = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(padding, 0, padding, 0)
-        }
-        val start = EditText(this).apply {
-            hint = "Start color, for example #20102C"
-            setText(current?.first.orEmpty())
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-        }
-        val end = EditText(this).apply {
-            hint = "End color, for example #6A2A72"
-            setText(current?.second.orEmpty())
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-        }
-        form.addView(start)
-        form.addView(end)
+    private fun showGradientPalettePicker() {
+        val selected = AppPreferences.customGradientName(this)
+        val checked = gradientPalettes.indexOfFirst { it.name == selected }
         AlertDialog.Builder(this)
-            .setTitle("Customize gradient")
-            .setMessage("Enter two HEX colors. Your colors are softened automatically in light mode so text remains readable.")
-            .setView(form)
-            .setPositiveButton("Apply", null)
-            .setNeutralButton("Reset", null)
-            .setNegativeButton("Cancel", null)
-            .create().also { dialog ->
-                dialog.setOnShowListener {
-                    dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                        val first = normalizedHex(start.text.toString())
-                        val second = normalizedHex(end.text.toString())
-                        if (first == null || second == null) {
-                            Toast.makeText(this, "Use six-digit HEX colors, such as #20102C", Toast.LENGTH_LONG).show()
-                            return@setOnClickListener
-                        }
-                        AppPreferences.setCustomGradient(this, first, second)
-                        applyAppearance()
-                        renderGradientStatus()
-                        dialog.dismiss()
-                    }
-                    dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
-                        AppPreferences.clearCustomGradient(this)
-                        applyAppearance()
-                        renderGradientStatus()
-                        dialog.dismiss()
-                    }
-                }
-                dialog.show()
+            .setTitle("Choose a color palette")
+            .setSingleChoiceItems(gradientPalettes.map(GradientPalette::name).toTypedArray(), checked) { dialog, index ->
+                applyGradientPalette(gradientPalettes[index])
+                dialog.dismiss()
             }
+            .setNeutralButton("Use app default") { _, _ ->
+                AppPreferences.clearCustomGradient(this)
+                applyAppearance()
+                renderGradientStatus()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun applyGradientPalette(palette: GradientPalette) {
+        AppPreferences.setAccent(this, palette.accent)
+        AppPreferences.setCustomGradient(this, palette.startColor, palette.endColor, palette.name)
+        binding.accentGroup.check(when (palette.accent) {
+            AppPreferences.OCEAN -> R.id.accentOcean
+            AppPreferences.SUNSET -> R.id.accentSunset
+            else -> R.id.accentAmethyst
+        })
+        applyAppearance()
+        renderGradientStatus()
     }
 
     private fun showCommunityThemes() {
         AlertDialog.Builder(this)
             .setTitle("Community themes")
-            .setMessage("A small offline collection of community-inspired gradients. You can edit any of them afterward.")
+            .setMessage("A small offline collection of community-inspired palettes.")
             .setItems(communityThemePacks.map(CommunityTheme::name).toTypedArray()) { _, index ->
                 val theme = communityThemePacks[index]
                 AppPreferences.setAccent(this, theme.accent)
-                AppPreferences.setCustomGradient(this, theme.startColor, theme.endColor)
+                AppPreferences.setCustomGradient(this, theme.startColor, theme.endColor, theme.name)
                 binding.accentGroup.check(when (theme.accent) {
                     AppPreferences.OCEAN -> R.id.accentOcean
                     AppPreferences.SUNSET -> R.id.accentSunset
@@ -290,12 +276,6 @@ class SettingsActivity : AppCompatActivity() {
             }
             .setNegativeButton("Cancel", null)
             .show()
-    }
-
-    private fun normalizedHex(value: String): String? {
-        val trimmed = value.trim()
-        if (!Regex("#[0-9A-Fa-f]{6}").matches(trimmed)) return null
-        return runCatching { Color.parseColor(trimmed); trimmed.uppercase() }.getOrNull()
     }
 
     private fun applySystemBarInsets() {
@@ -321,9 +301,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun renderGradientStatus() {
-        binding.gradientStatus.text = AppPreferences.customGradient(this)?.let { (start, end) ->
-            "Custom gradient: $start to $end"
-        } ?: "Using the selected glass color’s default gradient."
+        binding.gradientStatus.text = AppPreferences.customGradient(this)?.let {
+            "Palette: ${AppPreferences.customGradientName(this)}"
+        } ?: "Using the selected glass color’s default palette."
     }
 
     private fun closeSettings() {
@@ -354,6 +334,13 @@ class SettingsActivity : AppCompatActivity() {
 }
 
 private data class CommunityTheme(
+    val name: String,
+    val accent: String,
+    val startColor: String,
+    val endColor: String,
+)
+
+private data class GradientPalette(
     val name: String,
     val accent: String,
     val startColor: String,

@@ -9,6 +9,7 @@ import android.os.Build
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.Color
+import android.graphics.BlurMaskFilter
 import android.view.GestureDetector
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -16,6 +17,7 @@ import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.text.style.ClickableSpan
+import android.text.style.MaskFilterSpan
 import android.text.method.LinkMovementMethod
 import android.text.TextPaint
 import android.graphics.Typeface
@@ -106,6 +108,7 @@ class PlayerActivity : AppCompatActivity() {
         binding.shareSong.setOnClickListener { shareCurrentSong() }
         binding.inlineLyrics.movementMethod = LinkMovementMethod.getInstance()
         binding.inlineLyrics.highlightColor = Color.TRANSPARENT
+        binding.inlineLyrics.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
         binding.artworkContainer.setOnTouchListener { _, event ->
             playerGestures.onTouchEvent(event)
             true
@@ -339,6 +342,17 @@ class PlayerActivity : AppCompatActivity() {
             )
             styled.setSpan(RelativeSizeSpan(if (active) 1.13f else 0.91f), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             if (active) styled.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            if (!active) {
+                val blurRadius = when (distance) {
+                    1 -> 2.5f
+                    2 -> 4.5f
+                    else -> 6.5f
+                }
+                styled.setSpan(
+                    MaskFilterSpan(BlurMaskFilter(blurRadius, BlurMaskFilter.Blur.NORMAL)),
+                    start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
             styled.setSpan(object : ClickableSpan() {
                 override fun onClick(widget: View) {
                     controller?.seekTo(line.timeMs)

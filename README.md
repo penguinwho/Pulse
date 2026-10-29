@@ -10,6 +10,25 @@ Pulse is a small, private-by-default Android music player. It plays audio alread
 - Continues playback in the background with lock-screen and notification controls
 - Can share the currently playing song and artist with Discord Rich Presence when Discord is installed
 - Can optionally upload embedded cover art to the user's Cloudflare R2 bucket for Discord Rich Presence
+- Shows synchronized lyrics with one crisp active line while surrounding lines fade and blur
+- Lets listeners tap a timed lyric line to jump to that point in the song
+- Includes glass-style library, full-player, and lyrics views with palette themes and smooth gestures
+
+## Interface
+
+Pulse has three connected listening views:
+
+<p align="center">
+  <img src="Screenshot_20261029-111447.png" width="250" alt="Pulse music library" />
+  <img src="Screenshot_20261029-111450.png" width="250" alt="Pulse now playing screen" />
+  <img src="Screenshot_20261029-111453.png" width="250" alt="Pulse focused lyrics screen" />
+</p>
+
+- **Library:** rounded music cards, search, filters, now-playing controls, and Songs/Albums/Artists navigation.
+- **Now playing:** large rounded cover art, a blurred cover background, playback controls, sharing, and swipe gestures.
+- **Focused lyrics:** the current vocal line stays sharp and bright while the earlier and upcoming lines are softly blurred. Tap a synced line to seek directly to it.
+
+The appearance can be changed in **Settings > Appearance** with built-in glass colors, named color palettes, and community-inspired themes.
 
 ## Build an APK
 

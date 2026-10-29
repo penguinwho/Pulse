@@ -70,6 +70,23 @@
         android:text="Choose a song from your library"
         android:textColor="@color/pulse_muted"
         android:textSize="16sp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+        <Button android:id="@+id/queue" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Queue" />
+        <Button android:id="@+id/addToPlaylist" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Playlist" />
+        <Button android:id="@+id/sleepTimer" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Sleep" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button android:id="@+id/lyrics" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Lyrics" />
+        <Button android:id="@+id/equalizer" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Sound" />
+        <Button android:id="@+id/shareSong" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Share" />
+    </LinearLayout>
     <SeekBar
         android:id="@+id/progress"
         android:layout_width="match_parent"

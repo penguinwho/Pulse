@@ -2,6 +2,8 @@ const PUBLIC_BASE_URL = "https://pub-162b1465caff4240b9002d150090b804.r2.dev";
 const TURNSTILE_SITEKEY = "0x4AAAAAAFqAc7c9lfzrV5he";
 const MAX_COVER_BYTES = 4 * 1024 * 1024;
 const SESSION_DURATION_SECONDS = 24 * 60 * 60;
+const COVER_LIFETIME_MS = 5 * 60 * 60 * 1000;
+const COVER_PREFIX = "covers/";
 const encoder = new TextEncoder();
 
 const base64Url = (value) => btoa(String.fromCharCode(...new Uint8Array(value)))
@@ -47,6 +49,24 @@ function authorizationPage() {
   return new Response(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script></head><body><p>Verifying cover sharing…</p><div class="cf-turnstile" data-sitekey="${TURNSTILE_SITEKEY}" data-callback="authorized"></div><script>async function authorized(token) { const response = await fetch('/session', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({token}) }); const data = await response.json(); if (data.session) location.href = 'pulse://cloudflare-authorized?session=' + encodeURIComponent(data.session); }</script></body></html>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 
+function coverExpiry(object) {
+  const storedExpiry = Number(object.customMetadata?.expiresAt);
+  return Number.isFinite(storedExpiry) ? storedExpiry : object.uploaded.getTime() + COVER_LIFETIME_MS;
+}
+
+/** Removes expired cover art. Connect this Worker to a Cron Trigger in Cloudflare. */
+async function deleteExpiredCovers(bucket, now = Date.now()) {
+  let cursor;
+  do {
+    const page = await bucket.list({ prefix: COVER_PREFIX, cursor });
+    const expiredKeys = page.objects
+      .filter((object) => coverExpiry(object) <= now)
+      .map((object) => object.key);
+    if (expiredKeys.length > 0) await bucket.delete(expiredKeys);
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+}
+
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
@@ -67,8 +87,17 @@ export default {
     if (bytes.byteLength === 0 || bytes.byteLength > MAX_COVER_BYTES) return new Response("Cover must be between 1 byte and 4 MiB", { status: 413 });
     const digest = await crypto.subtle.digest("SHA-256", bytes);
     const name = [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-    const key = `covers/${name}.${extension}`;
-    if (!(await env.COVERS.head(key))) await env.COVERS.put(key, bytes, { httpMetadata: { contentType, cacheControl: "public, max-age=31536000, immutable" } });
+    const key = `${COVER_PREFIX}${name}.${extension}`;
+    const expiresAt = Date.now() + COVER_LIFETIME_MS;
+    // Re-uploading identical artwork refreshes its five-hour lifetime.
+    await env.COVERS.put(key, bytes, {
+      httpMetadata: { contentType, cacheControl: "public, max-age=300" },
+      customMetadata: { expiresAt: String(expiresAt) },
+    });
     return Response.json({ url: `${PUBLIC_BASE_URL}/${key}` });
+  },
+
+  async scheduled(_event, env, ctx) {
+    ctx.waitUntil(deleteExpiredCovers(env.COVERS));
   },
 };

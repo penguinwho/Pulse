@@ -7,6 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -43,6 +46,12 @@ class SettingsActivity : AppCompatActivity() {
         binding.enableCloudflareCoverSharing.setOnClickListener {
             cloudflareAuthorization.launch(Intent(this, CloudflareCoverAuthActivity::class.java))
         }
+        binding.discordPresence.isChecked = AppPreferences.discordEnabled(this)
+        binding.discordPresence.setOnCheckedChangeListener { _, enabled ->
+            AppPreferences.setDiscordEnabled(this, enabled)
+            if (!enabled) DiscordPresence.clear(this)
+        }
+        binding.checkForUpdates.setOnClickListener { checkForUpdates() }
         binding.version.text = "Pulse ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
         when (AppPreferences.theme(this)) {
             AppPreferences.LIGHT -> binding.themeLight.isChecked = true
@@ -98,6 +107,33 @@ class SettingsActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/penguinwho/Pulse/releases"))
         if (intent.resolveActivity(packageManager) != null) startActivity(intent)
         else Toast.makeText(this, "No browser is available", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun checkForUpdates() {
+        binding.checkForUpdates.isEnabled = false
+        binding.checkForUpdates.text = "Checking…"
+        Thread {
+            val result = runCatching {
+                val connection = URL("https://api.github.com/repos/penguinwho/Pulse/releases/latest")
+                    .openConnection() as HttpURLConnection
+                connection.connectTimeout = 8_000
+                connection.readTimeout = 8_000
+                connection.setRequestProperty("Accept", "application/vnd.github+json")
+                connection.inputStream.bufferedReader().use { JSONObject(it.readText()).getString("tag_name") }
+            }
+            runOnUiThread {
+                binding.checkForUpdates.isEnabled = true
+                binding.checkForUpdates.text = "Check for updates"
+                val latest = result.getOrNull()?.removePrefix("v")
+                val message = when {
+                    latest == null -> "Could not check for updates"
+                    latest != BuildConfig.VERSION_NAME -> "Version $latest is available"
+                    else -> "Pulse is up to date"
+                }
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                if (latest != null && latest != BuildConfig.VERSION_NAME) openReleasesPage()
+            }
+        }.start()
     }
 
     private fun applySystemBarInsets() {

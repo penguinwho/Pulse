@@ -53,7 +53,7 @@ object DiscordPresence {
     }
 
     fun update(context: Context, title: String?, artist: String?, playing: Boolean, coverUrl: String? = null) {
-        if (!playing || title.isNullOrBlank()) {
+        if (!AppPreferences.discordEnabled(context) || !playing || title.isNullOrBlank()) {
             clear(context)
             return
         }

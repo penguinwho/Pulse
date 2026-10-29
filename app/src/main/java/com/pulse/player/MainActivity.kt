@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity() {
     private var controllerFuture: ListenableFuture<MediaController>? = null
     private var browseMode = BrowseMode.SONGS
     private var sourceFilter = SourceFilter.ALL
+    private var selectedPlaylist: String? = null
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -142,16 +143,26 @@ class MainActivity : AppCompatActivity() {
 
     private fun visibleSongs(): List<Song> {
         val needle = binding.search.text?.toString().orEmpty().trim()
-        return allSongs.filter { song ->
+        val playlistIds = selectedPlaylist?.let { AppPreferences.playlists(this)[it].orEmpty() }
+        val recentIds = AppPreferences.recentSongIds(this)
+        val filtered = allSongs.filter { song ->
             val sourceMatches = when (sourceFilter) {
                 SourceFilter.ALL -> true
                 SourceFilter.DEVICE -> !song.fromAddedFolder
                 SourceFilter.FOLDERS -> song.fromAddedFolder
                 SourceFilter.FAVORITES -> AppPreferences.isFavorite(this, song.id)
+                SourceFilter.RECENT -> recentIds.contains(song.id)
+                SourceFilter.PLAYLIST -> playlistIds?.contains(song.id) == true
             }
             sourceMatches && (needle.isBlank() ||
-            song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true)
+            song.title.contains(needle, true) || song.artist.contains(needle, true) || song.album.contains(needle, true) ||
+                (song.fromAddedFolder && "added folder".contains(needle, true))
             )
+        }
+        return when (sourceFilter) {
+            SourceFilter.RECENT -> filtered.sortedBy { recentIds.indexOf(it.id) }
+            SourceFilter.PLAYLIST -> filtered.sortedBy { playlistIds?.indexOf(it.id) ?: Int.MAX_VALUE }
+            else -> filtered
         }
     }
 
@@ -200,13 +211,24 @@ class MainActivity : AppCompatActivity() {
             menu.add(0, 2, 1, "Device library")
             menu.add(0, 3, 2, "Added folders")
             menu.add(0, 4, 3, "Favorites")
+            menu.add(0, 5, 4, "Recently played")
+            val playlists = AppPreferences.playlists(this@MainActivity)
+            if (playlists.isNotEmpty()) {
+                menu.add("Playlists")
+                playlists.keys.sorted().forEachIndexed { index, name ->
+                    menu.add(0, 100 + index, 10 + index, name)
+                }
+            }
             setOnMenuItemClickListener { item ->
                 sourceFilter = when (item.itemId) {
                     2 -> SourceFilter.DEVICE
                     3 -> SourceFilter.FOLDERS
                     4 -> SourceFilter.FAVORITES
+                    5 -> SourceFilter.RECENT
+                    in 100..999 -> SourceFilter.PLAYLIST
                     else -> SourceFilter.ALL
                 }
+                selectedPlaylist = if (sourceFilter == SourceFilter.PLAYLIST) item.title.toString() else null
                 binding.filter.contentDescription = "Filter: ${item.title}"
                 renderLibrary()
                 true
@@ -297,4 +319,4 @@ class MainActivity : AppCompatActivity() {
 }
 
 private enum class BrowseMode { SONGS, ALBUMS, ARTISTS }
-private enum class SourceFilter { ALL, DEVICE, FOLDERS, FAVORITES }
+private enum class SourceFilter { ALL, DEVICE, FOLDERS, FAVORITES, RECENT, PLAYLIST }

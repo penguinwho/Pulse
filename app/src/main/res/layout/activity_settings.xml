@@ -88,7 +88,7 @@
                 android:id="@+id/customizeGradient"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Customize gradient" />
+                android:text="Choose palette" />
             <Button
                 android:id="@+id/communityThemes"
                 android:layout_width="wrap_content"

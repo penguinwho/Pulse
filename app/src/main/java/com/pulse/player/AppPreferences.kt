@@ -16,6 +16,7 @@ object AppPreferences {
     private const val ACCENT = "accent"
     private const val GRADIENT_START = "gradient_start"
     private const val GRADIENT_END = "gradient_end"
+    private const val GRADIENT_NAME = "gradient_name"
     private const val HISTORY = "listening_history"
     private const val PLAYLISTS = "playlists"
     private const val SLEEP_TIMER_END = "sleep_timer_end"
@@ -154,14 +155,18 @@ object AppPreferences {
         return if (start.isBlank() || end.isBlank()) null else start to end
     }
 
-    fun setCustomGradient(context: Context, start: String, end: String) {
+    fun customGradientName(context: Context): String =
+        prefs(context).getString(GRADIENT_NAME, "Custom palette").orEmpty()
+
+    fun setCustomGradient(context: Context, start: String, end: String, name: String = "Custom palette") {
         prefs(context).edit()
             .putString(GRADIENT_START, start.trim())
             .putString(GRADIENT_END, end.trim())
+            .putString(GRADIENT_NAME, name.trim())
             .apply()
     }
 
     fun clearCustomGradient(context: Context) {
-        prefs(context).edit().remove(GRADIENT_START).remove(GRADIENT_END).apply()
+        prefs(context).edit().remove(GRADIENT_START).remove(GRADIENT_END).remove(GRADIENT_NAME).apply()
     }
 }
